@@ -14,7 +14,7 @@ I requisiti dettagliati del progetto sono stati estratti dal documento fornito e
 
 Sono stati creati due script C# di base per il giocatore:
 
--   `PlayerController.cs`: Gestisce il movimento del giocatore e gli input.
+-   `PlayerController.cs`: Gestisce il movimento del giocatore e gli input. **È stato aggiornato per utilizzare l'applicazione di forze al Rigidbody per un movimento più fisico e realistico.**
 -   `PlayerStats.cs`: Gestisce le statistiche del giocatore come HP, AP, Attacco, Magia, Difesa ed Esperienza.
 
 Questi script si trovano nella cartella `Assets/Scripts/Player/`.
@@ -33,9 +33,9 @@ Di seguito è riportato un elenco dei file generati e aggiornati:
 
 -   `project_requirements.md`: Requisiti chiave del progetto.
 -   `unity_project_structure.md`: Struttura delle cartelle del progetto Unity.
--   `Assets/Scripts/Player/PlayerController.cs`: Script C# per il controllo del giocatore (ripristinato alla versione con Input Manager legacy).
+-   `Assets/Scripts/Player/PlayerController.cs`: Script C# per il controllo del giocatore (ora con movimento basato sulle forze).
 -   `Assets/Scripts/Player/PlayerStats.cs`: Script C# per le statistiche del giocatore.
--   `project_guide.md`: Guida all'avvio del progetto Unity (aggiornata con istruzioni per il nuovo Input System).
+-   `project_guide.md`: Guida all'avvio del progetto Unity (aggiornata con istruzioni per il nuovo Input System e il movimento basato sulle forze).
 
 
 

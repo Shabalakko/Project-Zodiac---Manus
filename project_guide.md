@@ -65,7 +65,7 @@ Abbiamo preparato due script C# di base per iniziare lo sviluppo del giocatore: 
 
 ### 4.1. PlayerController.cs
 
-Questo script gestisce il movimento del giocatore, il salto, la schivata/blocco, l'interazione e il cambio arma, basandosi sui controlli definiti nel documento di design. È progettato per essere attaccato a un GameObject che rappresenta il giocatore e richiede un componente `Rigidbody` per la gestione della fisica.
+Questo script gestisce il movimento del giocatore, il salto, la schivata/blocco, l'interazione e il cambio arma, basandosi sui controlli definiti nel documento di design. È progettato per essere attaccato a un GameObject che rappresenta il giocatore e richiede un componente `Rigidbody` per la gestione della fisica. Il movimento è ora gestito tramite l'applicazione di forze al Rigidbody, garantendo un comportamento più fisico e realistico.
 
 **Codice:**
 
@@ -86,15 +86,26 @@ public class PlayerController : MonoBehaviour
         rb = GetComponent<Rigidbody>();
     }
 
-    void Update()
+    void FixedUpdate()
     {
         // Movimento del giocatore (Left Analog / WASD)
         float horizontalInput = Input.GetAxis("Horizontal");
         float verticalInput = Input.GetAxis("Vertical");
 
-        Vector3 movement = new Vector3(horizontalInput, 0f, verticalInput) * moveSpeed * Time.deltaTime;
-        transform.Translate(movement, Space.Self);
+        Vector3 movement = transform.right * horizontalInput + transform.forward * verticalInput;
+        rb.AddForce(movement * moveSpeed * Time.fixedDeltaTime, ForceMode.VelocityChange);
 
+        // Limita la velocità orizzontale per evitare accelerazioni eccessive
+        Vector3 flatVel = new Vector3(rb.velocity.x, 0f, rb.velocity.z);
+        if (flatVel.magnitude > moveSpeed)
+        {
+            Vector3 limitedVel = flatVel.normalized * moveSpeed;
+            rb.velocity = new Vector3(limitedVel.x, rb.velocity.y, limitedVel.z);
+        }
+    }
+
+    void Update()
+    {
         // Salto (Circle / Space)
         if (Input.GetButtonDown("Jump") && isGrounded)
         {
@@ -106,7 +117,7 @@ public class PlayerController : MonoBehaviour
         if (Input.GetButtonDown("Fire2")) // Right Click or Square button
         {
             // Se in movimento, schiva
-            if (movement.magnitude > 0.1f)
+            if (new Vector3(Input.GetAxis("Horizontal"), 0f, Input.GetAxis("Vertical")).magnitude > 0.05f)
             {
                 Debug.Log("Schivata!");
                 // Implementare logica di schivata (es. breve impulso di velocità)
@@ -165,7 +176,7 @@ public class PlayerController : MonoBehaviour
     // Questi richiederanno un sistema di input più avanzato o un manager delle abilità
     public void UseElementalAbility() { Debug.Log("Abilità Elementale!"); }
     public void UseSupportAbility() { Debug.Log("Abilità di Supporto!"); }
-    public void UsePowerAbility() { Debug.Log("Abilità di Potenza!"); }
+    public void void UsePowerAbility() { Debug.Log("Abilità di Potenza!"); }
 
     public void UseItem1() { Debug.Log("Usa Oggetto 1!"); }
     public void UseItem2() { Debug.Log("Usa Oggetto 2!"); }
@@ -179,10 +190,7 @@ public class PlayerController : MonoBehaviour
 2.  Crea un nuovo script C# chiamato `PlayerController` all'interno di questa cartella e incolla il codice sopra.
 3.  Crea un GameObject vuoto nella tua scena (es. `Player`).
 4.  Aggiungi il componente `PlayerController` a questo GameObject.
-5.  Aggiungi un componente `Rigidbody` al GameObject `Player` e assicurati che 
-
-
-`Use Gravity` sia abilitato e `Is Kinematic` sia disabilitato. Puoi anche congelare le rotazioni (Constraints -> Freeze Rotation) per evitare rotazioni indesiderate.
+5.  Aggiungi un componente `Rigidbody` al GameObject `Player` e assicurati che `Use Gravity` sia abilitato e `Is Kinematic` sia disabilitato. Puoi anche congelare le rotazioni (Constraints -> Freeze Rotation) per evitare rotazioni indesiderate.
 6.  Assicurati che il tuo GameObject `Player` abbia un `Collider` (es. `Capsule Collider`) e che ci sia un `Collider` sul terreno con il tag "Ground" per il rilevamento della collisione.
 7.  Configura gli Input Manager di Unity (Edit -> Project Settings -> Input Manager) per i pulsanti `Jump`, `Fire2`, `Interact`, `LockOn`, `Weapon1`, `Weapon2`, `Weapon3`, `Weapon4`, `Cancel`, `ChangeTarget` come specificato nello script. Ad esempio, per `Jump` puoi usare "Space", per `Fire2` puoi usare "Mouse1" (tasto destro del mouse) o un pulsante del controller.
 
@@ -341,32 +349,7 @@ Il nuovo Input System utilizza un **Input Action Asset** per definire le azioni 
         -   `MenuPause` (Type: `Button`)
         -   `ChangeTarget` (Type: `Button`)
 
-6.  **Aggiungi i Binding:** Per ogni azione, clicca sul segno `+` sotto la colonna **Properties** per aggiungere i binding. Ecco alcuni esempi basati sui requisiti del progetto:
-
-    -   **Move:**
-        -   `Path: <Gamepad>/leftStick`
-        -   `Path: <Keyboard>/w` (con Composite: `2D Vector`, Up: `W`, Down: `S`, Left: `A`, Right: `D`)
-    -   **Jump:**
-        -   `Path: <Gamepad>/buttonSouth`
-        -   `Path: <Keyboard>/space`
-    -   **Attack:**
-        -   `Path: <Gamepad>/buttonWest`
-        -   `Path: <Mouse>/leftButton`
-    -   **DodgeBlock:**
-        -   `Path: <Gamepad>/buttonEast`
-        -   `Path: <Mouse>/rightButton`
-    -   **Interact:**
-        -   `Path: <Gamepad>/buttonNorth`
-        -   `Path: <Keyboard>/e`
-    -   **LockOn:**
-        -   `Path: <Gamepad>/rightShoulder`
-        -   `Path: <Keyboard>/q`
-    -   **MenuPause:**
-        -   `Path: <Gamepad>/start`
-        -   `Path: <Keyboard>/enter`
-    -   **ChangeTarget:**
-        -   `Path: <Gamepad>/rightTrigger`
-        -   `Path: <Keyboard>/tab`
+6.  **Aggiungi i Binding:** Per ogni azione, clicca sul segno `+` sotto la colonna **Properties** per aggiungere i binding. 
 
 7.  **Genera la Classe C#:** **Questo è un passaggio FONDAMENTALE.** Nella finestra **Input Actions**, assicurati che la casella **Generate C# Class** sia spuntata (di solito si trova nelle proprietà dell'asset, potresti dover scorrere verso il basso). Puoi lasciare il **Namespace** vuoto o impostarlo a `UnityEngine.InputSystem` se preferisci. Clicca su **Apply**.
 
@@ -537,9 +520,6 @@ public class PlayerController : MonoBehaviour
 
 Con queste modifiche, il tuo `PlayerController` sarà pronto per utilizzare il nuovo Input System, offrendo maggiore flessibilità e controllo sull'input del giocatore.
 
-
-
-
 ## 7. Implementazione del Sistema di Telecamera con Cinemachine
 
 Per implementare un sistema di telecamera avanzato e flessibile, si consiglia vivamente l'utilizzo di **Cinemachine**, un pacchetto di Unity che semplifica notevolmente la gestione delle telecamere di gioco, offrendo soluzioni robuste per telecamere in terza persona, telecamere di taglio cinematico e molto altro.
@@ -562,15 +542,12 @@ Una volta installato Cinemachine, puoi configurare rapidamente una telecamera in
 2.  **Assegna il Player al Follow Target:**
     -   Seleziona il GameObject `CM vcam1` nella gerarchia.
     -   Nell'Inspector, trova il campo **Follow** e trascina il tuo GameObject `Player` (o il GameObject che rappresenta il tuo giocatore) in questo campo.
-    -   Fai lo stesso per il campo **Look At**, trascinando il GameObject `Player` anche lì. Questo farà in modo che la telecamera segua e guardi il giocatore.
+    -   Fai lo stesso per il campo **Look At**, trascina il GameObject `Player` anche lì. Questo farà in modo che la telecamera segua e guardi il giocatore.
 
 3.  **Regola le Proprietà della Telecamera:**
     -   **Body:** Questa sezione controlla come la telecamera segue il target.
         -   **3rd Person Follow:** Questo è il tipo di body predefinito per una telecamera in terza persona. Puoi regolare `Shoulder Offset`, `Vertical Arm Length`, `Camera Side` e `Camera Distance` per posizionare la telecamera esattamente come desideri rispetto al giocatore. Sperimenta con questi valori per trovare l'angolazione e la distanza ideali.
-        -   **Damping:** I valori di Damping (X, Y, Z) controllano la fluidità con cui la telecamera si muove per raggiungere la posizione del target. Valori più alti rendono il movimento più lento e 
-
-
-più morbido, mentre valori più bassi la rendono più reattiva.
+        -   **Damping:** I valori di Damping (X, Y, Z) controllano la fluidità con cui la telecamera si muove per raggiungere la posizione del target. Valori più alti rendono il movimento più lento e più morbido, mentre valori più bassi la rendono più reattiva.
     -   **Built-in Collision Resolution:** Cinemachine offre un sistema di risoluzione delle collisioni integrato. Quando la telecamera si avvicina a un ostacolo, si adatta per evitare di entrare nell'oggetto, mantenendo sempre il target in vista. Puoi configurare `Camera Collision Filter` e `Ignore Tag` per personalizzare questo comportamento.
 
     -   **Aim:** Questa sezione controlla come la telecamera punta al target.

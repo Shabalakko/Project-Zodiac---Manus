@@ -14,15 +14,26 @@ public class PlayerController : MonoBehaviour
         rb = GetComponent<Rigidbody>();
     }
 
-    void Update()
+    void FixedUpdate()
     {
         // Movimento del giocatore (Left Analog / WASD)
         float horizontalInput = Input.GetAxis("Horizontal");
         float verticalInput = Input.GetAxis("Vertical");
 
-        Vector3 movement = new Vector3(horizontalInput, 0f, verticalInput) * moveSpeed * Time.deltaTime;
-        transform.Translate(movement, Space.Self);
+        Vector3 movement = transform.right * horizontalInput + transform.forward * verticalInput;
+        rb.AddForce(movement * moveSpeed * Time.fixedDeltaTime, ForceMode.VelocityChange);
 
+        // Limita la velocità orizzontale per evitare accelerazioni eccessive
+        Vector3 flatVel = new Vector3(rb.velocity.x, 0f, rb.velocity.z);
+        if (flatVel.magnitude > moveSpeed)
+        {
+            Vector3 limitedVel = flatVel.normalized * moveSpeed;
+            rb.velocity = new Vector3(limitedVel.x, rb.velocity.y, limitedVel.z);
+        }
+    }
+
+    void Update()
+    {
         // Salto (Circle / Space)
         if (Input.GetButtonDown("Jump") && isGrounded)
         {
@@ -34,7 +45,7 @@ public class PlayerController : MonoBehaviour
         if (Input.GetButtonDown("Fire2")) // Right Click or Square button
         {
             // Se in movimento, schiva
-            if (movement.magnitude > 0.05f)
+            if (new Vector3(Input.GetAxis("Horizontal"), 0f, Input.GetAxis("Vertical")).magnitude > 0.05f)
             {
                 Debug.Log("Schivata!");
                 // Implementare logica di schivata (es. breve impulso di velocità)
