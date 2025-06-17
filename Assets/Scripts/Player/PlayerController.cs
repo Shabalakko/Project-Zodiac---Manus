@@ -1,5 +1,4 @@
 using UnityEngine;
-using UnityEngine.InputSystem;
 
 public class PlayerController : MonoBehaviour
 {
@@ -10,55 +9,6 @@ public class PlayerController : MonoBehaviour
     private Rigidbody rb;
     private bool isGrounded;
 
-    // Input Actions
-    private PlayerInputActions playerInputActions;
-    private InputAction moveAction;
-    private InputAction jumpAction;
-    private InputAction attackAction;
-    private InputAction dodgeBlockAction;
-    private InputAction interactAction;
-    private InputAction lockOnAction;
-    private InputAction menuPauseAction;
-    private InputAction changeTargetAction;
-
-    void Awake()
-    {
-        playerInputActions = new PlayerInputActions();
-
-        // Assign actions
-        moveAction = playerInputActions.Player.Move;
-        jumpAction = playerInputActions.Player.Jump;
-        attackAction = playerInputActions.Player.Attack;
-        dodgeBlockAction = playerInputActions.Player.DodgeBlock;
-        interactAction = playerInputActions.Player.Interact;
-        lockOnAction = playerInputActions.Player.LockOn;
-        menuPauseAction = playerInputActions.Player.MenuPause;
-        changeTargetAction = playerInputActions.Player.ChangeTarget;
-
-        // Enable actions
-        moveAction.Enable();
-        jumpAction.Enable();
-        attackAction.Enable();
-        dodgeBlockAction.Enable();
-        interactAction.Enable();
-        lockOnAction.Enable();
-        menuPauseAction.Enable();
-        changeTargetAction.Enable();
-
-        // Subscribe to events for button presses
-        jumpAction.performed += OnJumpPerformed;
-        attackAction.performed += OnAttackPerformed;
-        dodgeBlockAction.performed += OnDodgeBlockPerformed;
-        interactAction.performed += OnInteractPerformed;
-        lockOnAction.performed += OnLockOnPerformed;
-        menuPauseAction.performed += OnMenuPausePerformed;
-        changeTargetAction.performed += OnChangeTargetPerformed;
-
-        // Note: Weapon change actions (Weapon1, Weapon2, etc.) and complex ability/item actions
-        // would need to be defined in the Input Action Asset and handled here or in separate managers.
-        // For simplicity, they are omitted in this basic PlayerController.
-    }
-
     void Start()
     {
         rb = GetComponent<Rigidbody>();
@@ -66,65 +16,69 @@ public class PlayerController : MonoBehaviour
 
     void Update()
     {
-        // Movement
-        Vector2 inputVector = moveAction.ReadValue<Vector2>();
-        Vector3 movement = new Vector3(inputVector.x, 0f, inputVector.y) * moveSpeed * Time.deltaTime;
-        transform.Translate(movement, Space.Self);
-    }
+        // Movimento del giocatore (Left Analog / WASD)
+        float horizontalInput = Input.GetAxis("Horizontal");
+        float verticalInput = Input.GetAxis("Vertical");
 
-    void OnJumpPerformed(InputAction.CallbackContext context)
-    {
-        if (isGrounded)
+        Vector3 movement = new Vector3(horizontalInput, 0f, verticalInput) * moveSpeed * Time.deltaTime;
+        transform.Translate(movement, Space.Self);
+
+        // Salto (Circle / Space)
+        if (Input.GetButtonDown("Jump") && isGrounded)
         {
             rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
             isGrounded = false;
-            Debug.Log("Jump!");
         }
-    }
 
-    void OnAttackPerformed(InputAction.CallbackContext context)
-    {
-        Debug.Log("Attack!");
-        // Implement attack logic
-    }
-
-    void OnDodgeBlockPerformed(InputAction.CallbackContext context)
-    {
-        Vector2 inputVector = moveAction.ReadValue<Vector2>();
-        if (inputVector.magnitude > 0.1f)
+        // Schivata / Blocco (Square / Right Click)
+        if (Input.GetButtonDown("Fire2")) // Right Click or Square button
         {
-            Debug.Log("Dodge!");
-            // Implement dodge logic
+            // Se in movimento, schiva
+            if (movement.magnitude > 0.1f)
+            {
+                Debug.Log("Schivata!");
+                // Implementare logica di schivata (es. breve impulso di velocità)
+            }
+            else // Se fermo, blocca
+            {
+                Debug.Log("Blocco!");
+                // Implementare logica di blocco
+            }
         }
-        else
+
+        // Interagisci / Parla / Analizza (Triangle / E)
+        if (Input.GetButtonDown("Interact")) // E button or Triangle button
         {
-            Debug.Log("Block!");
-            // Implement block logic
+            Debug.Log("Interagisci!");
+            // Implementare logica di interazione
         }
-    }
 
-    void OnInteractPerformed(InputAction.CallbackContext context)
-    {
-        Debug.Log("Interact!");
-        // Implement interact logic
-    }
+        // Lock On (R1 / Q)
+        if (Input.GetButtonDown("LockOn")) // Q button or R1 button
+        {
+            Debug.Log("Lock On!");
+            // Implementare logica di lock-on sui nemici
+        }
 
-    void OnLockOnPerformed(InputAction.CallbackContext context)
-    {
-        Debug.Log("Lock On!");
-        // Implement lock-on logic
-    }
+        // Cambio arma (Dpad / Numbers)
+        if (Input.GetButtonDown("Weapon1")) { Debug.Log("Cambio arma: Spada"); /* Logica cambio arma */ }
+        if (Input.GetButtonDown("Weapon2")) { Debug.Log("Cambio arma: Pugnali"); /* Logica cambio arma */ }
+        if (Input.GetButtonDown("Weapon3")) { Debug.Log("Cambio arma: Scudo"); /* Logica cambio arma */ }
+        if (Input.GetButtonDown("Weapon4")) { Debug.Log("Cambio arma: Pistole"); /* Logica cambio arma */ }
 
-    void OnMenuPausePerformed(InputAction.CallbackContext context)
-    {
-        Debug.Log("Menu / Pause!");
-        // Implement menu/pause logic
-    }
+        // Menu / Pausa (Start / Enter)
+        if (Input.GetButtonDown("Cancel")) // Enter button or Start button
+        {
+            Debug.Log("Menu / Pausa!");
+            // Implementare logica menu/pausa
+        }
 
-    void OnChangeTargetPerformed(InputAction.CallbackContext context)
-    {
-        Debug.Log("Change Target!");
-        // Implement change target logic
+        // Cambia nemico bloccato (R2 / TAB)
+        if (Input.GetButtonDown("ChangeTarget")) // TAB button or R2 button
+        {
+            Debug.Log("Cambia nemico bloccato!");
+            // Implementare logica cambio target
+        }
     }
 
     void OnCollisionEnter(Collision collision)
@@ -135,15 +89,15 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    void OnEnable()
-    {
-        playerInputActions.Enable();
-    }
+    // Metodi per le abilità e gli oggetti rapidi (L1/LShift e L2/LAlt)
+    // Questi richiederanno un sistema di input più avanzato o un manager delle abilità
+    public void UseElementalAbility() { Debug.Log("Abilità Elementale!"); }
+    public void UseSupportAbility() { Debug.Log("Abilità di Supporto!"); }
+    public void UsePowerAbility() { Debug.Log("Abilità di Potenza!"); }
 
-    void OnDisable()
-    {
-        playerInputActions.Disable();
-    }
+    public void UseItem1() { Debug.Log("Usa Oggetto 1!"); }
+    public void UseItem2() { Debug.Log("Usa Oggetto 2!"); }
+    public void UseItem3() { Debug.Log("Usa Oggetto 3!"); }
 }
 
 

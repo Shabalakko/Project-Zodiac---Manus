@@ -307,9 +307,9 @@ Ricorda di testare frequentemente e di iterare sul design man mano che procedi. 
 
 
 
-## 6. Aggiornamento al Nuovo Input System di Unity
+## 6. Implementazione del Nuovo Input System di Unity
 
-Per un controllo più flessibile e moderno, il progetto "Project Zodiac" utilizzerà il nuovo Input System di Unity. Questo sistema offre un approccio basato su azioni che facilita la gestione di input complessi e il supporto multi-piattaforma.
+Per un controllo più flessibile e moderno, il progetto "Project Zodiac" può utilizzare il nuovo Input System di Unity. Questo sistema offre un approccio basato su azioni che facilita la gestione di input complessi e il supporto multi-piattaforma.
 
 ### 6.1. Installazione del Pacchetto Input System
 
@@ -320,9 +320,9 @@ Per un controllo più flessibile e moderno, il progetto "Project Zodiac" utilizz
 5.  Clicca sul pulsante **Install** nell'angolo in basso a destra.
 6.  Dopo l'installazione, Unity ti chiederà se vuoi abilitare i nuovi backend di input e disabilitare quelli vecchi. Clicca su **Yes** (o **Sì**). L'Editor di Unity si riavvierà.
 
-### 6.2. Creazione di un Input Action Asset
+### 6.2. Creazione di un Input Action Asset e Generazione della Classe C#
 
-Il nuovo Input System utilizza un **Input Action Asset** per definire le azioni di input e i loro binding. Questo asset è fondamentale per il funzionamento del `PlayerController.cs` aggiornato.
+Il nuovo Input System utilizza un **Input Action Asset** per definire le azioni di input e i loro binding. Questo asset è fondamentale per il funzionamento degli script che utilizzeranno il nuovo sistema di input.
 
 1.  Nella finestra **Project** di Unity, crea una nuova cartella `Input` (es. `Assets/Input/`).
 2.  Clicca con il tasto destro nella cartella `Input`, vai su **Create > Input Actions**.
@@ -368,22 +368,13 @@ Il nuovo Input System utilizza un **Input Action Asset** per definire le azioni 
         -   `Path: <Gamepad>/rightTrigger`
         -   `Path: <Keyboard>/tab`
 
-7.  **Genera la Classe C#:** Nella finestra **Input Actions**, clicca su **Generate C# Class** (di solito si trova in alto a destra o nelle proprietà dell'asset). Assicurati che la casella **Generate C# Class** sia spuntata e che il **Namespace** sia vuoto o `UnityEngine.InputSystem` se preferisci. Clicca su **Apply**.
+7.  **Genera la Classe C#:** **Questo è un passaggio FONDAMENTALE.** Nella finestra **Input Actions**, assicurati che la casella **Generate C# Class** sia spuntata (di solito si trova nelle proprietà dell'asset, potresti dover scorrere verso il basso). Puoi lasciare il **Namespace** vuoto o impostarlo a `UnityEngine.InputSystem` se preferisci. Clicca su **Apply**.
 
-    Questo genererà un file C# (es. `PlayerInputActions.cs`) che il tuo script `PlayerController.cs` utilizzerà per accedere alle azioni di input. Assicurati che questo file generato si trovi nella cartella `Assets/Scripts/Player/` o in una sottocartella accessibile.
+    Questo genererà automaticamente un file C# (es. `PlayerInputActions.cs`) che il tuo script `PlayerController.cs` utilizzerà per accedere alle azioni di input. **Non devi creare questo file manualmente.** Unity lo creerà per te e lo manterrà aggiornato. Assicurati che questo file generato si trovi nella cartella `Assets/Scripts/Player/` o in una sottocartella accessibile.
 
-### 6.3. Aggiornamento di PlayerController.cs
+### 6.3. Aggiornamento di PlayerController.cs per il Nuovo Input System
 
-Lo script `PlayerController.cs` è stato modificato per utilizzare il nuovo Input System. Le principali differenze sono:
-
--   Inclusione di `using UnityEngine.InputSystem;`.
--   Dichiarazione di un'istanza di `PlayerInputActions` e di `InputAction` per ogni azione.
--   Nel metodo `Awake()`, le azioni vengono abilitate e vengono sottoscritti gli eventi `performed` per i pulsanti.
--   Nel metodo `Update()`, il movimento viene letto tramite `moveAction.ReadValue<Vector2>()`.
--   I metodi per la gestione degli eventi di input (es. `OnJumpPerformed`, `OnAttackPerformed`) vengono chiamati quando l'azione corrispondente viene eseguita.
--   I metodi `OnEnable()` e `OnDisable()` vengono utilizzati per abilitare e disabilitare le azioni quando lo script è attivo/disattivo.
-
-**Codice Aggiornato di PlayerController.cs:**
+Una volta generato il file `PlayerInputActions.cs` da Unity, puoi modificare il tuo `PlayerController.cs` per utilizzarlo. Ecco come dovrebbe apparire lo script `PlayerController.cs` per funzionare con il nuovo Input System:
 
 ```csharp
 using UnityEngine;
@@ -537,13 +528,13 @@ public class PlayerController : MonoBehaviour
 
 **Configurazione in Unity (Aggiornata):**
 
-1.  Segui i passaggi in **6.1. Installazione del Pacchetto Input System** e **6.2. Creazione di un Input Action Asset**.
-2.  Assicurati che il file `PlayerInputActions.cs` generato si trovi nella cartella `Assets/Scripts/Player/`.
+1.  Segui i passaggi in **6.1. Installazione del Pacchetto Input System** e **6.2. Creazione di un Input Action Asset e Generazione della Classe C#**.
+2.  Assicurati che il file `PlayerInputActions.cs` generato da Unity si trovi nella cartella `Assets/Scripts/Player/`.
 3.  Crea un GameObject vuoto nella tua scena (es. `Player`).
 4.  Aggiungi il componente `PlayerController` a questo GameObject.
 5.  Aggiungi un componente `Rigidbody` al GameObject `Player` e assicurati che `Use Gravity` sia abilitato e `Is Kinematic` sia disabilitato. Puoi anche congelare le rotazioni (Constraints -> Freeze Rotation) per evitare rotazioni indesiderate.
 6.  Assicurati che il tuo GameObject `Player` abbia un `Collider` (es. `Capsule Collider`) e che ci sia un `Collider` sul terreno con il tag "Ground" per il rilevamento della collisione.
 
-Con queste modifiche, il tuo `PlayerController` utilizzerà il nuovo Input System, offrendo maggiore flessibilità e controllo sull'input del giocatore.
+Con queste modifiche, il tuo `PlayerController` sarà pronto per utilizzare il nuovo Input System, offrendo maggiore flessibilità e controllo sull'input del giocatore.
 
 
