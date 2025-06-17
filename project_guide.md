@@ -305,3 +305,245 @@ Dopo aver configurato la struttura del progetto e gli script di base, ecco i pro
 Ricorda di testare frequentemente e di iterare sul design man mano che procedi. La documentazione di Unity e la vasta comunità online sono risorse preziose per qualsiasi problema o domanda che potresti incontrare.
 
 
+
+
+## 6. Aggiornamento al Nuovo Input System di Unity
+
+Per un controllo più flessibile e moderno, il progetto "Project Zodiac" utilizzerà il nuovo Input System di Unity. Questo sistema offre un approccio basato su azioni che facilita la gestione di input complessi e il supporto multi-piattaforma.
+
+### 6.1. Installazione del Pacchetto Input System
+
+1.  Apri il tuo progetto Unity.
+2.  Vai su **Window > Package Manager**.
+3.  Nel Package Manager, assicurati che il menu a discesa in alto a sinistra sia impostato su **Unity Registry**.
+4.  Cerca e seleziona il pacchetto **Input System**.
+5.  Clicca sul pulsante **Install** nell'angolo in basso a destra.
+6.  Dopo l'installazione, Unity ti chiederà se vuoi abilitare i nuovi backend di input e disabilitare quelli vecchi. Clicca su **Yes** (o **Sì**). L'Editor di Unity si riavvierà.
+
+### 6.2. Creazione di un Input Action Asset
+
+Il nuovo Input System utilizza un **Input Action Asset** per definire le azioni di input e i loro binding. Questo asset è fondamentale per il funzionamento del `PlayerController.cs` aggiornato.
+
+1.  Nella finestra **Project** di Unity, crea una nuova cartella `Input` (es. `Assets/Input/`).
+2.  Clicca con il tasto destro nella cartella `Input`, vai su **Create > Input Actions**.
+3.  Nomina il nuovo asset `PlayerInputActions` (o un nome simile).
+4.  Fai doppio clic sull'asset `PlayerInputActions` per aprirlo nella finestra **Input Actions**.
+5.  In questa finestra, vedrai tre colonne: **Action Maps**, **Actions** e **Properties**.
+
+    -   **Action Maps:** Clicca sul segno `+` sotto la colonna **Action Maps** e crea una nuova Action Map chiamata `Player`.
+    -   **Actions:** Con la Action Map `Player` selezionata, clicca sul segno `+` sotto la colonna **Actions** per creare le seguenti azioni. Per ciascuna azione, imposta il **Control Type** appropriato:
+        -   `Move` (Type: `Value`, Control Type: `Vector2`)
+        -   `Jump` (Type: `Button`)
+        -   `Attack` (Type: `Button`)
+        -   `DodgeBlock` (Type: `Button`)
+        -   `Interact` (Type: `Button`)
+        -   `LockOn` (Type: `Button`)
+        -   `MenuPause` (Type: `Button`)
+        -   `ChangeTarget` (Type: `Button`)
+
+6.  **Aggiungi i Binding:** Per ogni azione, clicca sul segno `+` sotto la colonna **Properties** per aggiungere i binding. Ecco alcuni esempi basati sui requisiti del progetto:
+
+    -   **Move:**
+        -   `Path: <Gamepad>/leftStick`
+        -   `Path: <Keyboard>/w` (con Composite: `2D Vector`, Up: `W`, Down: `S`, Left: `A`, Right: `D`)
+    -   **Jump:**
+        -   `Path: <Gamepad>/buttonSouth`
+        -   `Path: <Keyboard>/space`
+    -   **Attack:**
+        -   `Path: <Gamepad>/buttonWest`
+        -   `Path: <Mouse>/leftButton`
+    -   **DodgeBlock:**
+        -   `Path: <Gamepad>/buttonEast`
+        -   `Path: <Mouse>/rightButton`
+    -   **Interact:**
+        -   `Path: <Gamepad>/buttonNorth`
+        -   `Path: <Keyboard>/e`
+    -   **LockOn:**
+        -   `Path: <Gamepad>/rightShoulder`
+        -   `Path: <Keyboard>/q`
+    -   **MenuPause:**
+        -   `Path: <Gamepad>/start`
+        -   `Path: <Keyboard>/enter`
+    -   **ChangeTarget:**
+        -   `Path: <Gamepad>/rightTrigger`
+        -   `Path: <Keyboard>/tab`
+
+7.  **Genera la Classe C#:** Nella finestra **Input Actions**, clicca su **Generate C# Class** (di solito si trova in alto a destra o nelle proprietà dell'asset). Assicurati che la casella **Generate C# Class** sia spuntata e che il **Namespace** sia vuoto o `UnityEngine.InputSystem` se preferisci. Clicca su **Apply**.
+
+    Questo genererà un file C# (es. `PlayerInputActions.cs`) che il tuo script `PlayerController.cs` utilizzerà per accedere alle azioni di input. Assicurati che questo file generato si trovi nella cartella `Assets/Scripts/Player/` o in una sottocartella accessibile.
+
+### 6.3. Aggiornamento di PlayerController.cs
+
+Lo script `PlayerController.cs` è stato modificato per utilizzare il nuovo Input System. Le principali differenze sono:
+
+-   Inclusione di `using UnityEngine.InputSystem;`.
+-   Dichiarazione di un'istanza di `PlayerInputActions` e di `InputAction` per ogni azione.
+-   Nel metodo `Awake()`, le azioni vengono abilitate e vengono sottoscritti gli eventi `performed` per i pulsanti.
+-   Nel metodo `Update()`, il movimento viene letto tramite `moveAction.ReadValue<Vector2>()`.
+-   I metodi per la gestione degli eventi di input (es. `OnJumpPerformed`, `OnAttackPerformed`) vengono chiamati quando l'azione corrispondente viene eseguita.
+-   I metodi `OnEnable()` e `OnDisable()` vengono utilizzati per abilitare e disabilitare le azioni quando lo script è attivo/disattivo.
+
+**Codice Aggiornato di PlayerController.cs:**
+
+```csharp
+using UnityEngine;
+using UnityEngine.InputSystem;
+
+public class PlayerController : MonoBehaviour
+{
+    [Header("Movement Settings")]
+    public float moveSpeed = 5f;
+    public float jumpForce = 10f;
+
+    private Rigidbody rb;
+    private bool isGrounded;
+
+    // Input Actions
+    private PlayerInputActions playerInputActions;
+    private InputAction moveAction;
+    private InputAction jumpAction;
+    private InputAction attackAction;
+    private InputAction dodgeBlockAction;
+    private InputAction interactAction;
+    private InputAction lockOnAction;
+    private InputAction menuPauseAction;
+    private InputAction changeTargetAction;
+
+    void Awake()
+    {
+        playerInputActions = new PlayerInputActions();
+
+        // Assign actions
+        moveAction = playerInputActions.Player.Move;
+        jumpAction = playerInputActions.Player.Jump;
+        attackAction = playerInputActions.Player.Attack;
+        dodgeBlockAction = playerInputActions.Player.DodgeBlock;
+        interactAction = playerInputActions.Player.Interact;
+        lockOnAction = playerInputActions.Player.LockOn;
+        menuPauseAction = playerInputActions.Player.MenuPause;
+        changeTargetAction = playerInputActions.Player.ChangeTarget;
+
+        // Enable actions
+        moveAction.Enable();
+        jumpAction.Enable();
+        attackAction.Enable();
+        dodgeBlockAction.Enable();
+        interactAction.Enable();
+        lockOnAction.Enable();
+        menuPauseAction.Enable();
+        changeTargetAction.Enable();
+
+        // Subscribe to events for button presses
+        jumpAction.performed += OnJumpPerformed;
+        attackAction.performed += OnAttackPerformed;
+        dodgeBlockAction.performed += OnDodgeBlockPerformed;
+        interactAction.performed += OnInteractPerformed;
+        lockOnAction.performed += OnLockOnPerformed;
+        menuPauseAction.performed += OnMenuPausePerformed;
+        changeTargetAction.performed += OnChangeTargetPerformed;
+
+        // Note: Weapon change actions (Weapon1, Weapon2, etc.) and complex ability/item actions
+        // would need to be defined in the Input Action Asset and handled here or in separate managers.
+        // For simplicity, they are omitted in this basic PlayerController.
+    }
+
+    void Start()
+    {
+        rb = GetComponent<Rigidbody>();
+    }
+
+    void Update()
+    {
+        // Movement
+        Vector2 inputVector = moveAction.ReadValue<Vector2>();
+        Vector3 movement = new Vector3(inputVector.x, 0f, inputVector.y) * moveSpeed * Time.deltaTime;
+        transform.Translate(movement, Space.Self);
+    }
+
+    void OnJumpPerformed(InputAction.CallbackContext context)
+    {
+        if (isGrounded)
+        {
+            rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
+            isGrounded = false;
+            Debug.Log("Jump!");
+        }
+    }
+
+    void OnAttackPerformed(InputAction.CallbackContext context)
+    {
+        Debug.Log("Attack!");
+        // Implement attack logic
+    }
+
+    void OnDodgeBlockPerformed(InputAction.CallbackContext context)
+    {
+        Vector2 inputVector = moveAction.ReadValue<Vector2>();
+        if (inputVector.magnitude > 0.1f)
+        {
+            Debug.Log("Dodge!");
+            // Implement dodge logic
+        }
+        else
+        {
+            Debug.Log("Block!");
+            // Implement block logic
+        }
+    }
+
+    void OnInteractPerformed(InputAction.CallbackContext context)
+    {
+        Debug.Log("Interact!");
+        // Implement interact logic
+    }
+
+    void OnLockOnPerformed(InputAction.CallbackContext context)
+    {
+        Debug.Log("Lock On!");
+        // Implement lock-on logic
+    }
+
+    void OnMenuPausePerformed(InputAction.CallbackContext context)
+    {
+        Debug.Log("Menu / Pause!");
+        // Implement menu/pause logic
+    }
+
+    void OnChangeTargetPerformed(InputAction.CallbackContext context)
+    {
+        Debug.Log("Change Target!");
+        // Implement change target logic
+    }
+
+    void OnCollisionEnter(Collision collision)
+    {
+        if (collision.gameObject.CompareTag("Ground"))
+        {
+            isGrounded = true;
+        }
+    }
+
+    void OnEnable()
+    {
+        playerInputActions.Enable();
+    }
+
+    void OnDisable()
+    {
+        playerInputActions.Disable();
+    }
+}
+```
+
+**Configurazione in Unity (Aggiornata):**
+
+1.  Segui i passaggi in **6.1. Installazione del Pacchetto Input System** e **6.2. Creazione di un Input Action Asset**.
+2.  Assicurati che il file `PlayerInputActions.cs` generato si trovi nella cartella `Assets/Scripts/Player/`.
+3.  Crea un GameObject vuoto nella tua scena (es. `Player`).
+4.  Aggiungi il componente `PlayerController` a questo GameObject.
+5.  Aggiungi un componente `Rigidbody` al GameObject `Player` e assicurati che `Use Gravity` sia abilitato e `Is Kinematic` sia disabilitato. Puoi anche congelare le rotazioni (Constraints -> Freeze Rotation) per evitare rotazioni indesiderate.
+6.  Assicurati che il tuo GameObject `Player` abbia un `Collider` (es. `Capsule Collider`) e che ci sia un `Collider` sul terreno con il tag "Ground" per il rilevamento della collisione.
+
+Con queste modifiche, il tuo `PlayerController` utilizzerà il nuovo Input System, offrendo maggiore flessibilità e controllo sull'input del giocatore.
+
+

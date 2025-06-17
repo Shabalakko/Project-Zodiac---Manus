@@ -34,3 +34,15 @@ Di seguito è riportato un elenco dei file generati:
 -   `project_guide.md`: Guida all'avvio del progetto Unity.
 
 
+
+
+## 6. Aggiornamenti per il Nuovo Input System
+
+Il progetto è stato aggiornato per utilizzare il nuovo Input System di Unity, che offre un controllo più flessibile e moderno. Le modifiche includono:
+
+-   **`PlayerController.cs` aggiornato:** Lo script `PlayerController.cs` è stato riscritto per interagire con il nuovo Input System, utilizzando `Input Actions` per gestire il movimento e le azioni del giocatore.
+-   **`PlayerInputActions.cs`:** È stato aggiunto un file `PlayerInputActions.cs` (generato da Unity tramite un Input Action Asset) che definisce le azioni di input e i loro binding. Questo file è essenziale per il funzionamento del nuovo sistema di input.
+
+Per i dettagli sull'installazione e la configurazione del nuovo Input System in Unity, fare riferimento alla sezione 6 della `project_guide.md`.
+
+
