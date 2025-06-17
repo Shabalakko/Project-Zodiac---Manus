@@ -38,3 +38,12 @@ Di seguito è riportato un elenco dei file generati e aggiornati:
 -   `project_guide.md`: Guida all'avvio del progetto Unity (aggiornata con istruzioni per il nuovo Input System).
 
 
+
+
+## 7. Implementazione del Sistema di Telecamera
+
+Per la gestione della telecamera, si è scelto di utilizzare il pacchetto **Cinemachine** di Unity. Questo strumento offre un approccio flessibile e robusto per creare telecamere di gioco, inclusa la configurazione di telecamere in terza persona che seguono il giocatore, gestiscono le collisioni con l'ambiente e offrono opzioni avanzate per la fluidità del movimento.
+
+Le istruzioni dettagliate per l'installazione e la configurazione di Cinemachine sono disponibili nella sezione 7 della `project_guide.md`.
+
+

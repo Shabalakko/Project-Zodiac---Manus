@@ -538,3 +538,54 @@ public class PlayerController : MonoBehaviour
 Con queste modifiche, il tuo `PlayerController` sarà pronto per utilizzare il nuovo Input System, offrendo maggiore flessibilità e controllo sull'input del giocatore.
 
 
+
+
+## 7. Implementazione del Sistema di Telecamera con Cinemachine
+
+Per implementare un sistema di telecamera avanzato e flessibile, si consiglia vivamente l'utilizzo di **Cinemachine**, un pacchetto di Unity che semplifica notevolmente la gestione delle telecamere di gioco, offrendo soluzioni robuste per telecamere in terza persona, telecamere di taglio cinematico e molto altro.
+
+### 7.1. Installazione del Pacchetto Cinemachine
+
+1.  Apri il tuo progetto Unity.
+2.  Vai su **Window > Package Manager**.
+3.  Nel Package Manager, assicurati che il menu a discesa in alto a sinistra sia impostato su **Unity Registry**.
+4.  Cerca e seleziona il pacchetto **Cinemachine**.
+5.  Clicca sul pulsante **Install** nell'angolo in basso a destra.
+
+### 7.2. Configurazione di una Telecamera in Terza Persona con Cinemachine
+
+Una volta installato Cinemachine, puoi configurare rapidamente una telecamera in terza persona che segue il tuo giocatore.
+
+1.  **Crea una Virtual Camera:** Nel menu di Unity, vai su **Cinemachine > Create 3rd Person Camera**.
+    Questo creerà automaticamente un nuovo GameObject chiamato `CM vcam1` (o simile) nella tua scena e lo configurerà come una telecamera virtuale in terza persona.
+
+2.  **Assegna il Player al Follow Target:**
+    -   Seleziona il GameObject `CM vcam1` nella gerarchia.
+    -   Nell'Inspector, trova il campo **Follow** e trascina il tuo GameObject `Player` (o il GameObject che rappresenta il tuo giocatore) in questo campo.
+    -   Fai lo stesso per il campo **Look At**, trascinando il GameObject `Player` anche lì. Questo farà in modo che la telecamera segua e guardi il giocatore.
+
+3.  **Regola le Proprietà della Telecamera:**
+    -   **Body:** Questa sezione controlla come la telecamera segue il target.
+        -   **3rd Person Follow:** Questo è il tipo di body predefinito per una telecamera in terza persona. Puoi regolare `Shoulder Offset`, `Vertical Arm Length`, `Camera Side` e `Camera Distance` per posizionare la telecamera esattamente come desideri rispetto al giocatore. Sperimenta con questi valori per trovare l'angolazione e la distanza ideali.
+        -   **Damping:** I valori di Damping (X, Y, Z) controllano la fluidità con cui la telecamera si muove per raggiungere la posizione del target. Valori più alti rendono il movimento più lento e 
+
+
+più morbido, mentre valori più bassi la rendono più reattiva.
+    -   **Built-in Collision Resolution:** Cinemachine offre un sistema di risoluzione delle collisioni integrato. Quando la telecamera si avvicina a un ostacolo, si adatta per evitare di entrare nell'oggetto, mantenendo sempre il target in vista. Puoi configurare `Camera Collision Filter` e `Ignore Tag` per personalizzare questo comportamento.
+
+    -   **Aim:** Questa sezione controlla come la telecamera punta al target.
+        -   **Composer:** Permette di definire un'area all'interno della quale il target può muoversi senza che la telecamera si muova. Utile per mantenere il target centrato o in una posizione specifica dello schermo.
+        -   **Lookahead Time, Lookahead Smoothing, Lookahead Yielding:** Controllano come la telecamera anticipa il movimento del target, utile per movimenti fluidi e prevedibili.
+
+4.  **Aggiungi un Cinemachine Brain:** Assicurati che la tua scena abbia un GameObject con il componente `Cinemachine Brain`. Questo viene aggiunto automaticamente alla Main Camera quando installi Cinemachine. Il `Cinemachine Brain` gestisce le transizioni tra le diverse telecamere virtuali nella scena.
+
+### 7.3. Vantaggi dell'utilizzo di Cinemachine
+
+-   **Flessibilità:** Permette di creare una vasta gamma di comportamenti della telecamera senza scrivere codice.
+-   **Fluidità:** Offre opzioni avanzate per smorzamento, anticipazione e transizioni fluide tra le telecamere.
+-   **Risoluzione delle Collisioni:** Gestisce automaticamente le collisioni della telecamera con l'ambiente, evitando che la telecamera attraversi gli oggetti.
+-   **Integrazione:** Si integra perfettamente con il sistema di animazione di Unity e con l'Input System.
+
+L'utilizzo di Cinemachine è altamente raccomandato per la gestione delle telecamere in progetti Unity complessi come "Project Zodiac", in quanto riduce significativamente il tempo di sviluppo e migliora la qualità dell'esperienza di gioco.
+
+
