@@ -34,7 +34,7 @@ public class PlayerController : MonoBehaviour
         if (Input.GetButtonDown("Fire2")) // Right Click or Square button
         {
             // Se in movimento, schiva
-            if (movement.magnitude > 0.1f)
+            if (movement.magnitude > 0.05f)
             {
                 Debug.Log("Schivata!");
                 // Implementare logica di schivata (es. breve impulso di velocità)
